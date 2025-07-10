@@ -10,12 +10,6 @@
 
 Welcome to the repository for **PIE-Med**, a cutting-edge system designed to enhance medical decision-making through the integration of Graph Neural Networks (GNNs), Explainable AI (XAI) techniques, and Large Language Models (LLMs).
 
-## 📝 Citation
-
-If you use **PIE-Med** in your research or find it helpful, please cite our work:
-
-> Romano, A., Riccio, G., Postiglione, M., & Moscato, V. (2024). *PIE-Med: Predicting, Interpreting and Explaining Medical Recommendations* [https://doi.org/10.1007/978-3-031-88720-8_2](https://doi.org/10.1007/978-3-031-88720-8_2)
-
 
 ## 🎥 Demo (or GIF)
 [Watch our demo](https://drive.google.com/file/d/1e9VXslnBzOOp5QHh4GTrT-La1PdKxhzS/preview) to see PIE-Med in action and learn how it can transform healthcare recommendations!
@@ -88,7 +82,7 @@ PIE-Med showcases the potential of combining GNNs, XAI, and LLMs to improve medi
 
 **PIE-Med** aims to support medical decision-making, but is not a substitute for professional medical advice. Users should confirm recommendations with authorised healthcare providers, as limitations of AI may affect accuracy. The system ensures transparency through interpretability techniques, but all results should be considered complementary to expert advice. **⚠️ Please note that the following repository is only a DEMO, with anonymised data used for illustrative purposes only**. 
 
-### 🖋️ **Citation**
+## 🖋️ **Citation**
 
 Please cite this work as follows:
 
