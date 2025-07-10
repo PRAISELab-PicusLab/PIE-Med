@@ -88,6 +88,21 @@ PIE-Med showcases the potential of combining GNNs, XAI, and LLMs to improve medi
 
 **PIE-Med** aims to support medical decision-making, but is not a substitute for professional medical advice. Users should confirm recommendations with authorised healthcare providers, as limitations of AI may affect accuracy. The system ensures transparency through interpretability techniques, but all results should be considered complementary to expert advice. **⚠️ Please note that the following repository is only a DEMO, with anonymised data used for illustrative purposes only**. 
 
+### 🖋️ **Citation**
+
+Please cite this work as follows:
+
+```bibtex
+@inproceedings{romano2025pie,
+  title={PIE-Med: Predicting, Interpreting and Explaining Medical Recommendations},
+  author={Romano, Antonio and Riccio, Giuseppe and Postiglione, Marco and Moscato, Vincenzo},
+  booktitle={European Conference on Information Retrieval},
+  pages={6--12},
+  year={2025},
+  organization={Springer}
+}
+```
+
 ## 🙏 Acknowledgments
 We extend our gratitude to the creators of the MIMIC-III database, the developers of the Python libraries used, and our research team for their contributions to this project.
 
