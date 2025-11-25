@@ -17,56 +17,84 @@ from pyhealth.explainer import HeteroGraphExplainer
 @st.cache_resource(hash_funcs={torch.nn.parameter.Parameter: lambda _: None})
 def load_gnn() -> Tuple[torch.nn.Module, torch.nn.Module, torch.nn.Module, torch.nn.Module,
                         MIMIC3Dataset, SampleEHRDataset, SampleEHRDataset]:
-    dataset = MIMIC3Dataset(
-        root=st.secrets.s3.s3_uri,
-        tables=["DIAGNOSES_ICD","PROCEDURES_ICD","PRESCRIPTIONS","NOTEEVENTS_ICD"],
-        code_mapping={"NDC": ("ATC", {"target_kwargs": {"level": 4}})},
-    )
+    # Monkey-patch pandas.read_csv to inject BackBlaze B2 storage options
+    original_read_csv = pd.read_csv
+    
+    def patched_read_csv(filepath_or_buffer, *args, **kwargs):
+        # If it's an S3 path, ensure storage_options are set for BackBlaze B2
+        if isinstance(filepath_or_buffer, str):
+            # Fix Windows backslash in S3 paths
+            if 'piemed' in filepath_or_buffer and '\\' in filepath_or_buffer:
+                filepath_or_buffer = filepath_or_buffer.replace('\\', '/')
+            if filepath_or_buffer.startswith('s3://') or 'piemed/' in filepath_or_buffer:
+                if not filepath_or_buffer.startswith('s3://'):
+                    filepath_or_buffer = 's3://' + filepath_or_buffer
+                kwargs['storage_options'] = {
+                    'key': st.secrets.s3.aws_access_key_id,
+                    'secret': st.secrets.s3.aws_secret_access_key,
+                    'client_kwargs': {
+                        'endpoint_url': st.secrets.s3.endpoint_url,
+                        'region_name': st.secrets.s3.region_name
+                    }
+                }
+        return original_read_csv(filepath_or_buffer, *args, **kwargs)
+    
+    pd.read_csv = patched_read_csv
+    
+    try:
+        dataset = MIMIC3Dataset(
+            root=st.secrets.s3.s3_uri,
+            tables=["DIAGNOSES_ICD","PROCEDURES_ICD","PRESCRIPTIONS","NOTEEVENTS_ICD"],
+            code_mapping={"NDC": ("ATC", {"target_kwargs": {"level": 4}})},
+        )
 
-    mimic3sample_med = dataset.set_task(task_fn=medication_recommendation_mimic3_fn)
-    mimic3sample_diag = dataset.set_task(task_fn=diagnosis_prediction_mimic3_fn)
+        mimic3sample_med = dataset.set_task(task_fn=medication_recommendation_mimic3_fn)
+        mimic3sample_diag = dataset.set_task(task_fn=diagnosis_prediction_mimic3_fn)
 
-    model_med_ig = GNN(
-        dataset=mimic3sample_med,
-        convlayer="GraphConv",
-        feature_keys=["procedures", "diagnosis", "symptoms"],
-        label_key="medications",
-        k=0,
-        embedding_dim=128,
-        hidden_channels=128
-    )
+        model_med_ig = GNN(
+            dataset=mimic3sample_med,
+            convlayer="GraphConv",
+            feature_keys=["procedures", "diagnosis", "symptoms"],
+            label_key="medications",
+            k=0,
+            embedding_dim=128,
+            hidden_channels=128
+        )
 
-    model_med_gnn = GNN(
-        dataset=mimic3sample_med,
-        convlayer="GraphConv",
-        feature_keys=["procedures", "diagnosis", "symptoms"],
-        label_key="medications",
-        k=0,
-        embedding_dim=128,
-        hidden_channels=128
-    )
+        model_med_gnn = GNN(
+            dataset=mimic3sample_med,
+            convlayer="GraphConv",
+            feature_keys=["procedures", "diagnosis", "symptoms"],
+            label_key="medications",
+            k=0,
+            embedding_dim=128,
+            hidden_channels=128
+        )
 
-    model_diag_ig = GNN(
-        dataset=mimic3sample_diag,
-        convlayer="GraphConv",
-        feature_keys=["procedures", "medications", "symptoms"],
-        label_key="diagnosis",
-        k=0,
-        embedding_dim=128,
-        hidden_channels=128
-    )
+        model_diag_ig = GNN(
+            dataset=mimic3sample_diag,
+            convlayer="GraphConv",
+            feature_keys=["procedures", "medications", "symptoms"],
+            label_key="diagnosis",
+            k=0,
+            embedding_dim=128,
+            hidden_channels=128
+        )
 
-    model_diag_gnn = GNN(
-        dataset=mimic3sample_diag,
-        convlayer="GraphConv",
-        feature_keys=["procedures", "medications", "symptoms"],
-        label_key="diagnosis",
-        k=0,
-        embedding_dim=128,
-        hidden_channels=128
-    )
+        model_diag_gnn = GNN(
+            dataset=mimic3sample_diag,
+            convlayer="GraphConv",
+            feature_keys=["procedures", "medications", "symptoms"],
+            label_key="diagnosis",
+            k=0,
+            embedding_dim=128,
+            hidden_channels=128
+        )
 
-    return model_med_ig, model_med_gnn, model_diag_ig, model_diag_gnn, dataset, mimic3sample_med, mimic3sample_diag
+        return model_med_ig, model_med_gnn, model_diag_ig, model_diag_gnn, dataset, mimic3sample_med, mimic3sample_diag
+    finally:
+        # Restore original pandas.read_csv
+        pd.read_csv = original_read_csv
 
 
 @st.cache_data(hash_funcs={torch.Tensor: lambda _: None})

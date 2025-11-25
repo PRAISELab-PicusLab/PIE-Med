@@ -34,7 +34,7 @@ def main():
     # st.sidebar.divider()
 
     # ---- MAIN PAGE ----
-    st.title(":rainbow[PIE-Med]")
+    st.markdown("<h1 style='text-align: center; color: inherit;'>PIE-Med</h1>", unsafe_allow_html=True)
     st.markdown("Welcome to PIE-Med 🩺!")
 
     desc = st.empty()
@@ -105,6 +105,12 @@ def main():
 
     desc.empty()
     placeholder2.empty()
+
+    st.sidebar.divider()
+    st.sidebar.caption("**Developed** by:")
+    st.sidebar.image("streamlit_images/PRAISELab_large_logo.png")
+    st.sidebar.image("streamlit_images/FedericoII_logo.png")
+    st.sidebar.image("streamlit_images/NW_logo.png")
 
     patient_dict = dataset.patients
     patient_info = patient_dict[selected_patient]
