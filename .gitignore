@@ -1,5 +1,8 @@
+# Ignore Python cache files
 __pycache__
-.cache
-.venv
-.streamlit
+
+# Ignore virtual environment directories
+.*
+
+# Ignore Streamlit results directory
 streamlit_results/
